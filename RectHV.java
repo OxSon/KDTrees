@@ -14,7 +14,7 @@ import edu.princeton.cs.algs4.StdDraw;
 
 /**
  *  The {@code RectHV} class is an immutable data type to encapsulate a
- *  two-dimensional axis-aligned rectagle with real-value coordinates.
+ *  two-dimensional axis-aligned rectangle with real-value coordinates.
  *  The rectangle is <em>closed</em>—it includes the points on the boundary.
  *  <p>
  *  For additional documentation,
