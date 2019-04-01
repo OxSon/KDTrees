@@ -8,7 +8,7 @@ import java.util.TreeMap;
 public class KdTreeST<Value> {
     private TreeMap<Point2D, Value> tree;
     
-    private class Node {
+    class Node {
     	   private Point2D p;      // the point
     	   private Value value;    // the symbol table maps the point to this value
     	   private RectHV rect;    // the axis-aligned rectangle corresponding to this node
