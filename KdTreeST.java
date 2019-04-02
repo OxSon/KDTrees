@@ -1,11 +1,10 @@
 package kdTree;
 
 import edu.princeton.cs.algs4.Point2D;
-import edu.princeton.cs.algs4.Queue;
 
-import java.util.TreeMap;
+import java.util.Comparator;
 
-public class KdTreeST<Value> {
+public final class KdTreeST<Value> {
     private Node root;
     private int size;
 
@@ -32,36 +31,33 @@ public class KdTreeST<Value> {
 
         if (root == null)
             root = new Node(p, val, new RectHV(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
-                    Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), true, 1);
+                    Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), true);
         else {
-            //TODO calculate rectangle
-
+            put(root, new Node(p, val));
         }
+
         size++;
     }
 
-    private Node put(Node prev, Node current, Point2D p, Value val) {
-        if (current == null) {
-            //FIXME do putting
-            return new Node(p, val, null, null, null, !prev.vertical, 1);
+    private Node put(Node prev, Node putNode) {
+        if (prev == null)
+            throw new NullPointerException("Node 'prev' in private put method is null");
 
+       if (prev.p.compareTo(putNode.p) < 0) {
+            if (prev.lb == null) {
+                prev.lb = new Node(putNode, prev);
+                return prev;
+            } else
+                put(prev.lb, putNode);
         } else {
-            if (current.vertical) {
-                //compare X values
-                if (Point2D.X_ORDER.compare(current.p, p) < 0) {
-                    put(current, current.lb, p, val);
-                } else {
-                    put(current, current.rt, p, val);
-                }
-            } else {
-                //compare Y values
-                if (Point2D.Y_ORDER.compare(current.p, p) < 0) {
-                    put(current, current.lb, p, val);
-                } else {
-                    put(current, current.rt, p, val);
-                }
-            }
+            if (prev.rt == null) {
+                prev.rt = new Node(putNode, prev);
+                return prev;
+            } else
+                put(prev.rt, putNode);
         }
+
+        return prev;
     }
 
     //get Value associated with point p
@@ -69,8 +65,18 @@ public class KdTreeST<Value> {
         if(p == null)
             throw new NullPointerException("Arguments cannot be null");
 
-        //TODO
-        return null;
+        return get(root, p).value;
+    }
+
+    private Node get(Node current, Point2D p) {
+        if (current == null || current.p.equals(p))
+            return current;
+        else if (current.p.compareTo(p) < 0)
+            get(current.lb, p);
+        else
+            get(current.rt, p);
+
+        return current;
     }
 
     //Does the symbol table contain point p?
@@ -78,8 +84,7 @@ public class KdTreeST<Value> {
         if(p == null)
             throw new NullPointerException("Arguments cannot be null");
 
-        //TODO
-        return false;
+        return get(p) != null;
     }
 
     //Iterable of all points in the symbol table
@@ -107,16 +112,16 @@ public class KdTreeST<Value> {
         return null;
     }
 
-    private class Node {
-        Point2D p;      // the point
-        Value value;    // the symbol table maps the point to this value
-        RectHV rect;    // the axis-aligned rectangle corresponding to this node
+    //FIXME calculate rectangles correctly
+    private final class Node implements Comparable<Node> {
+        final Point2D p;      // the point
+        final Value value;    // the symbol table maps the point to this value
+        final RectHV rect;    // the axis-aligned rectangle corresponding to this node
         Node lb;        // the left/bottom subtree
         Node rt;        // the right/top subtree
-        int size;       // number of nodes in subtree
-        boolean vertical; //is the node split vertically? if false, the node is split horizontally
+        final boolean vertical; //is the node split vertically? if false, the node is split horizontally
 
-        Node(Point2D p, Value value, RectHV rect, Node lb, Node rt, boolean vertical, int size) {
+        Node(Point2D p, Value value, RectHV rect, Node lb, Node rt, boolean vertical) {
             if(p == null || value == null)
                 throw new NullPointerException("Node's cannot have null Point or Value fields");
 
@@ -126,15 +131,30 @@ public class KdTreeST<Value> {
             this.lb = lb;
             this.rt = rt;
             this.vertical = vertical;
-            this.size = size;
         }
 
-        Node(Point2D p, Value value, RectHV rect, boolean vertical, int size) {
-            this(p, value, rect, null, null, vertical, size);
+        Node(Point2D p, Value value, RectHV rect, boolean vertical) {
+            this(p, value, rect, null, null, vertical);
         }
 
-        Node(Point2D p, Value value, boolean vertical, int size) {
-            this(p, value, null, null, null, vertical, size);
+        Node(Point2D p, Value value, boolean vertical) {
+            this(p, value, null, null, null, vertical);
+        }
+
+        Node(Node newNode, Node parentNode) {
+            this(newNode.p, newNode.value, null, null, null, !parentNode.vertical);
+        }
+
+        Node(Point2D p, Value val) {
+            this(p, val, null, null, null, false);
+        }
+
+        @Override
+        public int compareTo(Node other) {
+            if(vertical)
+                return Point2D.X_ORDER.compare(this.p, other.p);
+            else
+                return Point2D.Y_ORDER.compare(this.p, other.p);
         }
     }
 }
