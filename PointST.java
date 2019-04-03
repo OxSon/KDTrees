@@ -53,11 +53,11 @@ public class PointST<Value> {
     }
 
     //all points that are inside the rectangle
-    public Iterable<Point2D> range(RectHV rect) {
-        var hits = new Queue<Point2D>();
+    public Iterable<Point2D> range(edu.princeton.cs.algs4.RectHV rectHV) {
+        Queue<Point2D> hits = new Queue<Point2D>();
 
-        for(var point : tree.keySet())
-            if (rect.contains(point))
+        for(Point2D point : tree.keySet())
+            if (rectHV.contains(point))
                 hits.enqueue(point);
 
         return hits;
@@ -68,9 +68,9 @@ public class PointST<Value> {
         if(p == null)
             throw new NullPointerException("Arguments cannot be null");
 
-        var nearest = tree.firstKey();
+        Point2D nearest = tree.firstKey();
 
-        for(var point : tree.keySet())
+        for(Point2D point : tree.keySet())
             if(p.distanceSquaredTo(point) < p.distanceSquaredTo(nearest))
                 nearest = p;
 

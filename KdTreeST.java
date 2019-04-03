@@ -68,14 +68,12 @@ public final class KdTreeST<Value> {
     }
 
     private Node get(Node current, Point2D p) {
-        if (current == null || current.p.equals(p))
-            return current;
-        else if (current.p.compareTo(p) < 0)
-            get(current.lb, p);
+        if (current == null || current.p.equals(p)) 
+        	return current;
+        else if (current.p.compareTo(p) < 0) {
+        	return get(current.lb, p); }
         else
-            get(current.rt, p);
-
-        return current;
+            return get(current.rt, p);
     }
 
     //Does the symbol table contain point p?
@@ -93,8 +91,8 @@ public final class KdTreeST<Value> {
     }
 
     //all points that are inside the rectangle
-    public Iterable<Point2D> range(RectHV rect) {
-        if(rect == null)
+    public Iterable<Point2D> range(edu.princeton.cs.algs4.RectHV rectHV) {
+        if(rectHV == null)
             throw new NullPointerException("Arguments cannot be null");
 
         //TODO
