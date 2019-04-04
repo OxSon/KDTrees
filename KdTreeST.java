@@ -41,26 +41,12 @@ public final class KdTreeST<Value> {
     private Node put(Node prev, Node putNode) {
         if (prev == null)
             throw new NullPointerException("Node 'prev' in private put method is null");
-
-       if (compareByAxis(prev, putNode) < 0) {
-            if (prev.lb == null) {
-                prev.lb = new Node(putNode, prev);
-                size++;
-                return prev;
-            } else
-                put(prev.lb, putNode);
-        } 
-       else if (compareByAxis(prev, putNode) == 0) {
-       		prev.value = putNode.value;
-       		return prev;
-       }
-       	else {
-            if (prev.rt == null) {
-                prev.rt = new Node(putNode, prev);
-                size++;
-                return prev;
-            } else
-                put(prev.rt, putNode);
+        if(compareByAxis(prev.p, putNode.p) < 0) {
+            putLeft(prev, putNode);
+        } else if (prev.p.compareTo(putNode.p) == 0) {
+            prev = new Node(putNode.p, putNode.value, calculateRect(prev, true), !prev.vertical);
+        } else {
+            putRight(prev, putNode);
         }
 
         return prev;
@@ -73,6 +59,40 @@ public final class KdTreeST<Value> {
 		else {
 			return prev.p.y() - putNode.p.y();
 		}
+    }
+
+    private int compareByAxis(Point2D p, Point2D other) {
+        //FIXME
+        return 0;
+    }
+
+    private Node putLeft(Node prev, Node putNode) {
+        if(prev.lb == null) {
+            prev.lb = new Node(putNode.p, putNode.value, calculateRect(prev, true), !prev.vertical);
+            size++;
+        }
+        else {
+            prev.lb = put(prev.lb, putNode);
+        }
+
+        return prev;
+    }
+
+    private Node putRight(Node prev, Node putNode) {
+        if(prev.rt == null) {
+            prev.rt = new Node(putNode.p, putNode.value, calculateRect(prev, false), !prev.vertical);
+            size++;
+        }
+        else {
+            prev.rt = put(prev.rt, putNode);
+        }
+
+        return prev;
+    }
+
+    private RectHV calculateRect(Node prev, boolean left) {
+        //FIXME
+        return null;
     }
 
     //get Value associated with point p
@@ -148,14 +168,6 @@ public final class KdTreeST<Value> {
 
         Node(Point2D p, Value value, RectHV rect, boolean vertical) {
             this(p, value, rect, null, null, vertical);
-        }
-
-        Node(Point2D p, Value value, boolean vertical) {
-            this(p, value, null, null, null, vertical);
-        }
-
-        Node(Node newNode, Node parentNode) {
-            this(newNode.p, newNode.value, null, null, null, !parentNode.vertical);
         }
 
         Node(Point2D p, Value val) {
