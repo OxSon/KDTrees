@@ -24,6 +24,47 @@ public final class KdTreeST<Value> {
 
     //associate Value val with point p
     public void put(Point2D p, Value val) {
+        if(root == null) {
+        	root = new Node(p, val, calculateRect(null, false), null, null, true);
+        	size++;
+        }
+        root = put(root, p, val, root.vertical);
+    }
+    
+    private Node put(Node parent, Point2D p, Value val, Boolean vertical) {
+    	if(parent == null) {
+    		size++;
+    		return new Node(p, val, vertical);
+    	}
+    	
+    	if(parent.p.compareTo(p) == 0) {
+    		parent.value = val;
+    	}
+    	
+    	else if(compareByAxis(parent, p) < 0) {
+    		parent.lb = put(parent.lb, p, val, !parent.vertical);
+    	}
+    	
+    	else {
+    		parent.rt = put(parent.rt, p, val, !parent.vertical);
+    	}
+    	
+    	return parent;
+    }
+    
+    private double compareByAxis(Node parent, Point2D p) {
+		if(parent.vertical == true) {
+			return Point2D.X_ORDER.compare(parent.p, p);
+		}
+		else {
+			return Point2D.Y_ORDER.compare(parent.p, p);
+		}
+    }
+    
+    
+    /*
+     
+     public void put(Point2D p, Value val) {
         if(p == null || val == null)
             throw new NullPointerException("Arguments cannot be null");
         //TODO
@@ -37,8 +78,8 @@ public final class KdTreeST<Value> {
             put(root, new Node(p, val));
         }
     }
-
-    private Node put(Node prev, Node putNode) {
+     
+     private Node put(Node prev, Node putNode) {
         if (prev == null)
             throw new NullPointerException("Node 'prev' in private put method is null");
         if(compareByAxis(prev, putNode) < 0) {
@@ -51,16 +92,8 @@ public final class KdTreeST<Value> {
 
         return prev;
     }
-    
-    private double compareByAxis(Node prev, Node putNode) {
-		if(prev.vertical == true) {
-			return prev.p.x() - putNode.p.x();
-		}
-		else {
-			return prev.p.y() - putNode.p.y();
-		}
-    }
-
+     
+     
     private Node putLeft(Node prev, Node putNode) {
         if(prev.lb == null) {
             prev.lb = new Node(putNode.p, putNode.value, calculateRect(prev, true), !prev.vertical);
@@ -84,24 +117,26 @@ public final class KdTreeST<Value> {
 
         return prev;
     }
-
+	*/
+    
     private RectHV calculateRect(Node prev, boolean left) {
         //FIXME
         return null;
     }
+    
 
     //get Value associated with point p
     public Value get(Point2D p) {
         if(p == null)
             throw new NullPointerException("Arguments cannot be null");
-
-        return get(root, p).value;
+        Value val = get(root, p) != null ? get(root, p).value : null;
+        return val;
     }
 
     private Node get(Node current, Point2D p) {
-        if (current == null || current.p.equals(p)) 
+        if (current == null || current.p.compareTo(p) == 0) 
         	return current;
-        else if (current.p.compareTo(p) < 0) {
+        else if (compareByAxis(current, p) < 0) {
         	return get(current.lb, p); }
         else
             return get(current.rt, p);
@@ -144,7 +179,7 @@ public final class KdTreeST<Value> {
     private final class Node implements Comparable<Node> {
         final Point2D p;      // the point
         Value value;    // the symbol table maps the point to this value
-        final RectHV rect;    // the axis-aligned rectangle corresponding to this node
+        RectHV rect;    // the axis-aligned rectangle corresponding to this node
         Node lb;        // the left/bottom subtree
         Node rt;        // the right/top subtree
         final boolean vertical; //is the node split vertically? if false, the node is split horizontally
@@ -169,7 +204,13 @@ public final class KdTreeST<Value> {
             this(p, val, null, null, null, false);
         }
 
-        @Override
+        public Node(Point2D p, Value val, boolean vertical) {
+        	this.p = p;
+            this.value = val;
+            this.vertical = vertical; //TODO
+		}
+
+		@Override
         public int compareTo(Node other) {
             if(vertical)
                 return Point2D.X_ORDER.compare(this.p, other.p);
