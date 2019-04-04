@@ -1,6 +1,9 @@
 package kdTree;
 
 import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.Queue;
+
+import java.util.Comparator;
 
 
 public final class KdTreeST<Value> {
@@ -9,7 +12,6 @@ public final class KdTreeST<Value> {
 
     // construct an empty symbol table of points
     public KdTreeST() {
-        //TODO
     }
 
     // is the symbol table empty?
@@ -24,98 +26,91 @@ public final class KdTreeST<Value> {
 
     //associate Value val with point p
     public void put(Point2D p, Value val) {
-        if(p == null || val == null)
+        if (p == null || val == null)
             throw new NullPointerException("Arguments cannot be null");
-        //TODO
 
-        if (root == null) {
-            root = new Node(p, val, new RectHV(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
-                    Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), true);
-            size++;
-        }
-        else {
-            put(root, new Node(p, val));
-        }
+        root = put(null, root, p, val);
     }
 
-    private Node put(Node prev, Node putNode) {
-        if (prev == null)
-            throw new NullPointerException("Node 'prev' in private put method is null");
-        if(compareByAxis(prev, putNode) < 0) {
-            putLeft(prev, putNode);
-        } else if (prev.p.compareTo(putNode.p) == 0) {
-            prev = new Node(putNode.p, putNode.value, calculateRect(prev, true), !prev.vertical);
+    private Node put(Node prev, Node current, Point2D p, Value val) {
+        if (current == null) { //base case
+            size++;
+            return new Node(p, val, prev);
+        }
+
+        //we are updating a value of an already present key
+        if (current.p.equals(p)) {
+            current.value = val;
+            return current;
+        }
+
+        //we are adding a new key and still need to traverse the tree
+        if (compareByAxis(current, p) < 0)
+            current.lb = put(current, current.lb, p, val);
+        else
+            current.rt = put(current, current.rt, p, val);
+
+
+        return current;
+    }
+
+    private int compareByAxis(Node prev, Point2D other) {
+        if (prev.vertical)
+            return Point2D.X_ORDER.compare(other, prev.p);
+        else
+            return Point2D.Y_ORDER.compare(other, prev.p);
+    }
+
+    private RectHV calculateRect(Node parent, Point2D p) {
+        if (parent == null)
+            return rootRectangle();
+
+        int compareResult = parent.vertical ?
+                Point2D.X_ORDER.compare(p, parent.p) : Point2D.Y_ORDER.compare(p, parent.p);
+        RectHV parentRect = parent.rect;
+
+
+        if (parent.vertical) {
+            if (compareResult < 0)
+                return new RectHV(parentRect.xmin(), parentRect.ymin(), parent.p.x(), parentRect.ymax());
+            else
+                return new RectHV(parent.p.x(), parentRect.ymin(), parentRect.xmax(), parentRect.ymax());
         } else {
-            putRight(prev, putNode);
+            if (compareResult < 0)
+                return new RectHV(parentRect.xmin(), parentRect.ymin(), parentRect.xmax(), parent.p.y());
+            else
+                return new RectHV(parentRect.xmin(), parent.p.y(), parentRect.xmax(), parentRect.ymax());
         }
-
-        return prev;
-    }
-    
-    private double compareByAxis(Node prev, Node putNode) {
-		if(prev.vertical == true) {
-			return prev.p.x() - putNode.p.x();
-		}
-		else {
-			return prev.p.y() - putNode.p.y();
-		}
     }
 
-    private Node putLeft(Node prev, Node putNode) {
-        if(prev.lb == null) {
-            prev.lb = new Node(putNode.p, putNode.value, calculateRect(prev, true), !prev.vertical);
-            size++;
-        }
-        else {
-            prev.lb = put(prev.lb, putNode);
-        }
-
-        return prev;
-    }
-
-    private Node putRight(Node prev, Node putNode) {
-        if(prev.rt == null) {
-            prev.rt = new Node(putNode.p, putNode.value, calculateRect(prev, false), !prev.vertical);
-            size++;
-        }
-        else {
-            prev.rt = put(prev.rt, putNode);
-        }
-
-        return prev;
-    }
-
-    private RectHV calculateRect(Node prev, boolean left) {
-        //FIXME
-        return null;
-    }
 
     //get Value associated with point p
     public Value get(Point2D p) {
-        if(p == null)
+        if (p == null)
             throw new NullPointerException("Arguments cannot be null");
 
-        return get(root, p).value;
+        Node result = get(root, p);
+        return result == null ? null : result.value;
     }
 
     private Node get(Node current, Point2D p) {
-        if (current == null || current.p.equals(p)) 
-        	return current;
-        else if (current.p.compareTo(p) < 0) {
-        	return get(current.lb, p); }
-        else
+        if (current == null || current.p.equals(p))
+            return current;
+        else if (compareByAxis(current, p) < 0) {
+            return get(current.lb, p);
+        } else
             return get(current.rt, p);
     }
 
     //Does the symbol table contain point p?
     public boolean contains(Point2D p) {
-        if(p == null)
+        if (p == null)
             throw new NullPointerException("Arguments cannot be null");
 
         return get(p) != null;
     }
 
-    //Iterable of all points in the symbol table
+    //Iterable of all points in the symbol table in level order
     public Iterable<Point2D> points() {
         //TODO
         return null;
@@ -123,7 +118,7 @@ public final class KdTreeST<Value> {
 
     //all points that are inside the rectangle
     public Iterable<Point2D> range(edu.princeton.cs.algs4.RectHV rectHV) {
-        if(rectHV == null)
+        if (rectHV == null)
             throw new NullPointerException("Arguments cannot be null");
 
         //TODO
@@ -132,7 +127,7 @@ public final class KdTreeST<Value> {
 
     //a nearest neighbor to point p; null if the symbol table is empty
     public Point2D nearest(Point2D p) {
-        if(p == null)
+        if (p == null)
             throw new NullPointerException("Arguments cannot be null");
 
 
@@ -140,41 +135,31 @@ public final class KdTreeST<Value> {
         return null;
     }
 
+    private RectHV rootRectangle() {
+        return new RectHV(
+                Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY
+        );
+    }
+
     //FIXME calculate rectangles correctly
-    private final class Node implements Comparable<Node> {
+    private final class Node {
         final Point2D p;      // the point
-        Value value;    // the symbol table maps the point to this value
+        final boolean vertical; //is the node split vertically? if false, the node is split horizontally
         final RectHV rect;    // the axis-aligned rectangle corresponding to this node
+        Value value;    // the symbol table maps the point to this value
         Node lb;        // the left/bottom subtree
         Node rt;        // the right/top subtree
-        final boolean vertical; //is the node split vertically? if false, the node is split horizontally
 
-        Node(Point2D p, Value value, RectHV rect, Node lb, Node rt, boolean vertical) {
-            if(p == null || value == null)
-                throw new NullPointerException("Node's cannot have null Point or Value fields");
-
+        Node(Point2D p, Value val, RectHV rect, boolean vertical) {
             this.p = p;
-            this.value = value;
+            value = val;
             this.rect = rect;
-            this.lb = lb;
-            this.rt = rt;
             this.vertical = vertical;
         }
 
-        Node(Point2D p, Value value, RectHV rect, boolean vertical) {
-            this(p, value, rect, null, null, vertical);
-        }
-
-        Node(Point2D p, Value val) {
-            this(p, val, null, null, null, false);
-        }
-
-        @Override
-        public int compareTo(Node other) {
-            if(vertical)
-                return Point2D.X_ORDER.compare(this.p, other.p);
-            else
-                return Point2D.Y_ORDER.compare(this.p, other.p);
+        Node(Point2D p, Value val, Node parent) {
+            this(p, val, calculateRect(parent, p), parent == null || !parent.vertical);
         }
     }
 }
