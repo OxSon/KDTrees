@@ -28,35 +28,51 @@ public final class KdTreeST<Value> {
             throw new NullPointerException("Arguments cannot be null");
         //TODO
 
-        if (root == null)
+        if (root == null) {
             root = new Node(p, val, new RectHV(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
                     Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), true);
+            size++;
+        }
         else {
             put(root, new Node(p, val));
         }
-
-        size++;
     }
 
     private Node put(Node prev, Node putNode) {
         if (prev == null)
             throw new NullPointerException("Node 'prev' in private put method is null");
 
-       if (prev.p.compareTo(putNode.p) < 0) {
+       if (compareByAxis(prev, putNode) < 0) {
             if (prev.lb == null) {
                 prev.lb = new Node(putNode, prev);
+                size++;
                 return prev;
             } else
                 put(prev.lb, putNode);
-        } else {
+        } 
+       else if (compareByAxis(prev, putNode) == 0) {
+       		prev.value = putNode.value;
+       		return prev;
+       }
+       	else {
             if (prev.rt == null) {
                 prev.rt = new Node(putNode, prev);
+                size++;
                 return prev;
             } else
                 put(prev.rt, putNode);
         }
 
         return prev;
+    }
+    
+    private double compareByAxis(Node prev, Node putNode) {
+		if(prev.vertical == true) {
+			return prev.p.x() - putNode.p.x();
+		}
+		else {
+			return prev.p.y() - putNode.p.y();
+		}
     }
 
     //get Value associated with point p
@@ -112,7 +128,7 @@ public final class KdTreeST<Value> {
     //FIXME calculate rectangles correctly
     private final class Node implements Comparable<Node> {
         final Point2D p;      // the point
-        final Value value;    // the symbol table maps the point to this value
+        Value value;    // the symbol table maps the point to this value
         final RectHV rect;    // the axis-aligned rectangle corresponding to this node
         Node lb;        // the left/bottom subtree
         Node rt;        // the right/top subtree
