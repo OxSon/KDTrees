@@ -25,10 +25,10 @@ public final class KdTreeST<Value> {
     //associate Value val with point p
     public void put(Point2D p, Value val) {
         if(root == null) {
-        	root = new Node(p, val, calculateRect(null, false), null, null, true);
+        	root = new Node(p, val, calculateRect(root, false), null, null, true); // TODO calculateRect should do something with the root instead of passing true or false
         	size++;
         }
-        root = put(root, p, val, root.vertical);
+        root = put(root, p, val, root.vertical); //TODO Need to add RectHV to the nodes
     }
     
     private Node put(Node parent, Point2D p, Value val, Boolean vertical) {
@@ -36,19 +36,15 @@ public final class KdTreeST<Value> {
     		size++;
     		return new Node(p, val, vertical);
     	}
-    	
     	if(parent.p.compareTo(p) == 0) {
     		parent.value = val;
     	}
-    	
     	else if(compareByAxis(parent, p) < 0) {
     		parent.lb = put(parent.lb, p, val, !parent.vertical);
     	}
-    	
     	else {
     		parent.rt = put(parent.rt, p, val, !parent.vertical);
     	}
-    	
     	return parent;
     }
     
@@ -120,8 +116,32 @@ public final class KdTreeST<Value> {
 	*/
     
     private RectHV calculateRect(Node prev, boolean left) {
-        //FIXME
-        return null;
+        if(root == null) {
+        	return new RectHV(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, 
+        			Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        } 
+        
+        if(prev.vertical) {
+        	if(left) {
+        		return new RectHV(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, 
+            			prev.p.x(), Double.POSITIVE_INFINITY);
+        	}
+        	else {
+        		return new RectHV(prev.p.x(), Double.NEGATIVE_INFINITY, 
+            			Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        	}
+        }
+        
+        else {
+        	if(left) {
+        		return new RectHV(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, 
+            			Double.POSITIVE_INFINITY, prev.p.y());
+        	}
+        	else {
+        		return new RectHV(Double.NEGATIVE_INFINITY, prev.p.y(), 
+            			Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        	}
+        }    
     }
     
 
@@ -129,8 +149,8 @@ public final class KdTreeST<Value> {
     public Value get(Point2D p) {
         if(p == null)
             throw new NullPointerException("Arguments cannot be null");
-        Value val = get(root, p) != null ? get(root, p).value : null;
-        return val;
+        Node getNode = get(root, p);
+        return getNode != null ? getNode.value : null;
     }
 
     private Node get(Node current, Point2D p) {
@@ -169,8 +189,6 @@ public final class KdTreeST<Value> {
     public Point2D nearest(Point2D p) {
         if(p == null)
             throw new NullPointerException("Arguments cannot be null");
-
-
         //TODO
         return null;
     }

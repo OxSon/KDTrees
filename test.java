@@ -15,6 +15,6 @@ public class test {
 		test.put(new Point2D(4,3), "fifth");
 		
 		
-		System.out.println(test.get(new Point2D(5,6)));
+		System.out.println(test.get(new Point2D(4,3)));
 	}
 }
