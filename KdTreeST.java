@@ -112,8 +112,25 @@ public final class KdTreeST<Value> {
 
     //Iterable of all points in the symbol table in level order
     public Iterable<Point2D> points() {
-        //TODO
-        return null;
+        Node temp = root; //node we are currently processing
+        Queue<Point2D> levelOrder = new Queue<>(); //stores processed points in final level order
+        Queue<Node> tempQ = new Queue<>(); //holds nodes to be processed
+
+        while (temp != null) {
+            //add the node we're processing's point to our final level order
+            levelOrder.enqueue(temp.p);
+
+            //add its children, if they exist
+            if (temp.lb != null)
+                tempQ.enqueue(temp.lb);
+            if (temp.rt != null)
+                tempQ.enqueue(temp.rt);
+
+            //move to next node to be processed, set temp to null to indicate we're finished
+            temp = tempQ.isEmpty() ? null : tempQ.dequeue();
+        }
+
+        return levelOrder;
     }
 
     //all points that are inside the rectangle
