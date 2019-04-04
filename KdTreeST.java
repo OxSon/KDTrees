@@ -41,7 +41,7 @@ public final class KdTreeST<Value> {
     private Node put(Node prev, Node putNode) {
         if (prev == null)
             throw new NullPointerException("Node 'prev' in private put method is null");
-        if(compareByAxis(prev.p, putNode.p) < 0) {
+        if(compareByAxis(prev, putNode) < 0) {
             putLeft(prev, putNode);
         } else if (prev.p.compareTo(putNode.p) == 0) {
             prev = new Node(putNode.p, putNode.value, calculateRect(prev, true), !prev.vertical);
@@ -59,11 +59,6 @@ public final class KdTreeST<Value> {
 		else {
 			return prev.p.y() - putNode.p.y();
 		}
-    }
-
-    private int compareByAxis(Point2D p, Point2D other) {
-        //FIXME
-        return 0;
     }
 
     private Node putLeft(Node prev, Node putNode) {
