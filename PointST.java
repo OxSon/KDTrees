@@ -1,6 +1,7 @@
 package kdTree;
 
 import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.Queue;
 
 import java.util.TreeMap;

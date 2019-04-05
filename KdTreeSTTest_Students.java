@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.RectHV;
 
 
 public class KdTreeSTTest_Students {

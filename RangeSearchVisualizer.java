@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/******************************************************************************
-=======
 package kdTree; /******************************************************************************
->>>>>>> 357fa58aa6454c757dbda92d6eb71416458200e1
  *  Compilation:  javac RangeSearchVisualizer.java
  *  Execution:    java RangeSearchVisualizer input.txt
  *  Dependencies: PointST.java KdTreeST.java
@@ -15,35 +11,19 @@ package kdTree; /***************************************************************
  *  in red; the results using the kd-tree algorithms are drawn in blue.
  *
  ******************************************************************************/
-<<<<<<< HEAD
-package kdTree;
-
-import java.util.Scanner;
-
-import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.Point2D;
-=======
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
->>>>>>> 357fa58aa6454c757dbda92d6eb71416458200e1
 import edu.princeton.cs.algs4.StdDraw;
 
 public class RangeSearchVisualizer {
 
-<<<<<<< HEAD
-	public static void main(String[] args) {
-
-        String filename = "circle1000.txt";
-        In in = new In(new Scanner(KdTreeST.class.getResourceAsStream(filename)));
-=======
     public static void main(String[] args) {
 
 //        String filename = args[0];
         String filename = "input10.txt";
         In in = new In(filename);
->>>>>>> 357fa58aa6454c757dbda92d6eb71416458200e1
 
         StdDraw.show(0);
 
@@ -73,11 +53,7 @@ public class RangeSearchVisualizer {
             StdDraw.show(40);
 
             // user starts to drag a rectangle
-<<<<<<< HEAD
             if (StdDraw.mousePressed() && !isDragging) {
-=======
-            if (StdDraw.isMousePressed() && !isDragging) {
->>>>>>> 357fa58aa6454c757dbda92d6eb71416458200e1
                 x0 = StdDraw.mouseX();
                 y0 = StdDraw.mouseY();
                 isDragging = true;
@@ -85,22 +61,14 @@ public class RangeSearchVisualizer {
             }
 
             // user is dragging a rectangle
-<<<<<<< HEAD
             else if (StdDraw.mousePressed() && isDragging) {
-=======
-            else if (StdDraw.isMousePressed() && isDragging) {
->>>>>>> 357fa58aa6454c757dbda92d6eb71416458200e1
                 x1 = StdDraw.mouseX();
                 y1 = StdDraw.mouseY();
                 continue;
             }
 
             // mouse no longer pressed
-<<<<<<< HEAD
             else if (!StdDraw.mousePressed() && isDragging) {
-=======
-            else if (!StdDraw.isMousePressed() && isDragging) {
->>>>>>> 357fa58aa6454c757dbda92d6eb71416458200e1
                 isDragging = false;
             }
 
