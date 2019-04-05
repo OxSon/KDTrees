@@ -2,9 +2,7 @@ package kdTree;
 
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.Queue;
-
-import java.util.Comparator;
-
+import edu.princeton.cs.algs4.RectHV;
 
 public final class KdTreeST<Value> {
     private Node root;
@@ -256,6 +254,7 @@ public final class KdTreeST<Value> {
     public Iterable<Point2D> range(RectHV rectHV) {
         if (rectHV == null)
             throw new NullPointerException("Arguments cannot be null");
+<<<<<<< HEAD
         Queue<Point2D> nodesInRange = new Queue<>();
         check(nodesInRange, root, rectHV);
         
@@ -286,6 +285,38 @@ public final class KdTreeST<Value> {
 	    	}
     	}
     	return intersectQueue;
+=======
+
+        Queue<Point2D> nodesInRange = new Queue<>();
+        check(nodesInRange, root, rectHV);
+
+        return nodesInRange;
+    }
+
+    private void check(Queue<Point2D> q, Node node, RectHV rect) {
+        if(node != null) {
+//        if(node != null && node.rect.intersects(rect)) {
+            if(rect.contains(node.p))
+                q.enqueue(node.p);
+
+            for(Node child : getIntersections(node, rect))
+                check(q, child, rect);
+        }
+    }
+
+    private Queue<Node> getIntersections(Node node, RectHV rect) {
+        Queue<Node> intersections = new Queue<>();
+        if(node.lb != null) {
+            if (rect.intersects(node.rect))
+                intersections.enqueue(node.lb);
+        }
+        if (node.rt != null) {
+            if (rect.intersects(node.rect))
+                intersections.enqueue(node.rt);
+        }
+
+        return intersections;
+>>>>>>> 357fa58aa6454c757dbda92d6eb71416458200e1
     }
 
     //a nearest neighbor to point p; null if the symbol table is empty
