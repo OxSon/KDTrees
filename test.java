@@ -13,6 +13,6 @@ public class test {
 		test.put(new Point2D(5,6), "third");
 		test.put(new Point2D(4,6), "fourth");
 		
-		System.out.println(test.get(new Point2D(5,4)));
+		System.out.println(test.get(new Point2D(4,6)));
 	}
 }
