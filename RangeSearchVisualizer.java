@@ -12,6 +12,8 @@ package kdTree; /***************************************************************
  *
  ******************************************************************************/
 
+import java.util.Scanner;
+
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
@@ -23,7 +25,7 @@ public class RangeSearchVisualizer {
 
 //        String filename = args[0];
         String filename = "input10.txt";
-        In in = new In(filename);
+        In in = new In(new Scanner(KdTreeST.class.getResourceAsStream(filename)));
 
         StdDraw.show(0);
 

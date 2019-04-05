@@ -72,8 +72,8 @@ public class PointST<Value> {
         Point2D nearest = tree.firstKey();
 
         for(Point2D point : tree.keySet())
-            if(p.distanceSquaredTo(point) < p.distanceSquaredTo(nearest))
-                nearest = p;
+            if(p.distanceTo(point) < p.distanceTo(nearest))
+                nearest = point;
 
         return nearest;
     }

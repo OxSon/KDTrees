@@ -171,12 +171,35 @@ public final class KdTreeST<Value> {
     public Point2D nearest(Point2D p) {
         if (p == null)
             throw new NullPointerException("Arguments cannot be null");
-
-
-        //TODO
-        return null;
+        Node champion = nearestNode(p, root, root);
+        
+        return champion.p;
     }
-
+    
+    private Node nearestNode(Point2D p, Node champion, Node current) {
+    	
+    	if(current.p.distanceTo(p) < champion.p.distanceTo(p)) {
+    		champion = current;
+    	}
+    	   
+		if (current.lb != null && compareByAxis(current, p) < 0 && current.lb.rect.intersects(nearestQueryRect(p, champion))) {
+				return nearestNode(p, champion, current.lb);
+		}
+		else if (current.rt != null && compareByAxis(current, p) > 0 && current.rt.rect.intersects(nearestQueryRect(p, champion))) {
+				return nearestNode(p, champion, current.rt);
+		}
+    	return champion;
+    }
+    
+    private RectHV nearestQueryRect(Point2D p, Node champion) {
+    	return new RectHV(
+    			p.x() - p.distanceTo(champion.p),
+    			p.y() - p.distanceTo(champion.p),
+    			p.x() + p.distanceTo(champion.p),
+    			p.y() + p.distanceTo(champion.p)
+    			);
+    }
+    
     private RectHV rootRectangle() {
         return new RectHV(
                 Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
