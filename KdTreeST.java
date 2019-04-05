@@ -134,12 +134,39 @@ public final class KdTreeST<Value> {
     }
 
     //all points that are inside the rectangle
-    public Iterable<Point2D> range(edu.princeton.cs.algs4.RectHV rectHV) {
+    public Iterable<Point2D> range(RectHV rectHV) {
         if (rectHV == null)
             throw new NullPointerException("Arguments cannot be null");
-
-        //TODO
-        return null;
+        Queue<Point2D> nodesInRange = new Queue<>();
+        check(nodesInRange, root, rectHV);
+        
+        return nodesInRange;
+    }
+    
+    private void check(Queue<Point2D> q, Node node, RectHV rect) {
+    	if(node != null && node.rect.intersects(rect)) {
+    		if(rect.contains(node.p)) {
+    			q.enqueue(node.p);
+    		}
+    		for(Node child : getIntersections(node, rect)) {
+    			check(q, child, rect);
+    		}
+    	}
+    }
+    
+    private Queue<Node> getIntersections(Node node, RectHV rect) {
+    	Queue<Node> intersectQueue = new Queue<>();
+    	if(node.lb != null) {
+	    	if(rect.contains(node.lb.p)) {
+	    		intersectQueue.enqueue(node.lb);
+	    	}
+    	}
+    	if(node.rt != null) {
+	    	if(rect.contains(node.rt.p)) {
+	    		intersectQueue.enqueue(node.rt);
+	    	}
+    	}
+    	return intersectQueue;
     }
 
     //a nearest neighbor to point p; null if the symbol table is empty

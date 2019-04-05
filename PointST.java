@@ -53,7 +53,7 @@ public class PointST<Value> {
     }
 
     //all points that are inside the rectangle
-    public Iterable<Point2D> range(edu.princeton.cs.algs4.RectHV rectHV) {
+    public Iterable<Point2D> range(RectHV rectHV) {
         Queue<Point2D> hits = new Queue<Point2D>();
 
         for(Point2D point : tree.keySet())

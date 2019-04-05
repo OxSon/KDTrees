@@ -14,5 +14,7 @@ public class test {
 		test.put(new Point2D(4,6), "fourth");
 		
 		System.out.println(test.get(new Point2D(4,6)));
+		System.out.println(test.range(new RectHV(5, 3, 10, 10)));
+		
 	}
 }

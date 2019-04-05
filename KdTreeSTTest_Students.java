@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.princeton.cs.algs4.Point2D;
-import edu.princeton.cs.algs4.RectHV;
+
 
 public class KdTreeSTTest_Students {
 	Point2D[] treePoints = {new Point2D(0,0), new Point2D(1,1), new Point2D(2,2), new Point2D(1,-1), new Point2D(2,-2),
