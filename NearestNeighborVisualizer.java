@@ -22,7 +22,7 @@ import edu.princeton.cs.algs4.StdDraw;
 public class NearestNeighborVisualizer {
 
     public static void main(String[] args) {
-    	String filename = "input10.txt";
+    	String filename = "input11.txt";
         In in = new In(new Scanner(KdTreeST.class.getResourceAsStream(filename)));
 
         StdDraw.show(0);
