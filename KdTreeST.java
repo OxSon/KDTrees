@@ -1,3 +1,10 @@
+/**
+ * Creates a symbol table that implements a KDtree with Point2D as key
+ * 
+ * 
+ * @author Alec Mills & Kenneth Salguero
+ */
+
 package kdTree;
 
 import edu.princeton.cs.algs4.Point2D;
@@ -8,25 +15,36 @@ public final class KdTreeST<Value> {
     private Node root;
     private int size;
 
-    // construct an empty symbol table of points
+    /**
+     * construct an empty symbol table of points
+     */
     public KdTreeST() {
     }
 
-    // is the symbol table empty?
+    /**
+     * is the symbol table empty?
+     * @return true if tree is empty
+     */
     public boolean isEmpty() {
         return root == null;
     }
 
-    // number of points
+    /**
+     * number of points
+     * @return size of the tree
+     */
     public int size() {
         return size;
     }
 
-    //associate Value val with point p
+    /**
+     * associate Value val with point p
+     * @param p
+     * @param val
+     */
     public void put(Point2D p, Value val) {
         if (p == null || val == null)
             throw new NullPointerException("Arguments cannot be null");
-
         root = put(null, root, p, val);
     }
 
@@ -47,18 +65,30 @@ public final class KdTreeST<Value> {
             current.lb = put(current, current.lb, p, val);
         else
             current.rt = put(current, current.rt, p, val);
-
-
+        
         return current;
     }
-
+    
+    /**
+     * Compares a node & a point by which ever level node is at
+     * used to determine which way to go in the tree
+     * @param prev
+     * @param other
+     * @return int
+     */
     private int compareByAxis(Node prev, Point2D other) {
         if (prev.vertical)
             return Point2D.X_ORDER.compare(other, prev.p);
         else
             return Point2D.Y_ORDER.compare(other, prev.p);
     }
-
+    
+    /**
+     * Calculates rectangle for a given point
+     * @param parent
+     * @param p
+     * @return RectHV of p
+     */
     private RectHV calculateRect(Node parent, Point2D p) {
         if (parent == null)
             return rootRectangle();
@@ -66,7 +96,6 @@ public final class KdTreeST<Value> {
         int compareResult = parent.vertical ?
                 Point2D.X_ORDER.compare(p, parent.p) : Point2D.Y_ORDER.compare(p, parent.p);
         RectHV parentRect = parent.rect;
-
 
         if (parent.vertical) {
             if (compareResult < 0)
@@ -82,7 +111,11 @@ public final class KdTreeST<Value> {
     }
 
 
-    //get Value associated with point p
+    /**
+     * get Value associated with point p
+     * @param p
+     * @return value of p
+     */
     public Value get(Point2D p) {
         if (p == null)
             throw new NullPointerException("Arguments cannot be null");
@@ -100,7 +133,11 @@ public final class KdTreeST<Value> {
             return get(current.rt, p);
     }
 
-    //Does the symbol table contain point p?
+    /**
+     * Does the symbol table contain point p?
+     * @param p
+     * @return true if point is in tree
+     */
     public boolean contains(Point2D p) {
         if (p == null)
             throw new NullPointerException("Arguments cannot be null");
@@ -108,7 +145,10 @@ public final class KdTreeST<Value> {
         return get(p) != null;
     }
 
-    //Iterable of all points in the symbol table in level order
+    /**
+     * Iterable of all points in the symbol table in level order
+     * @return iterator of all points in tree
+     */
     public Iterable<Point2D> points() {
         Node temp = root; //node we are currently processing
         Queue<Point2D> levelOrder = new Queue<>(); //stores processed points in final level order
@@ -131,7 +171,11 @@ public final class KdTreeST<Value> {
         return levelOrder;
     }
 
-    //all points that are inside the rectangle
+    /**
+     * all points that are inside the rectangle
+     * @param rectHV
+     * @return points inside range of rectHV
+     */
     public Iterable<Point2D> range(RectHV rectHV) {
         if (rectHV == null)
             throw new NullPointerException("Arguments cannot be null");
@@ -144,7 +188,6 @@ public final class KdTreeST<Value> {
 
     private void check(Queue<Point2D> q, Node node, RectHV rect) {
         if(node != null) {
-//        if(node != null && node.rect.intersects(rect)) {
             if(rect.contains(node.p))
                 q.enqueue(node.p);
 
@@ -152,7 +195,7 @@ public final class KdTreeST<Value> {
                 check(q, child, rect);
         }
     }
-
+    
     private Queue<Node> getIntersections(Node node, RectHV rect) {
         Queue<Node> intersections = new Queue<>();
         if(node.lb != null) {
@@ -167,17 +210,18 @@ public final class KdTreeST<Value> {
         return intersections;
     }
 
-    //a nearest neighbor to point p; null if the symbol table is empty
+    /**
+     * a nearest neighbor to point p; null if the symbol table is empty
+     * @param p
+     * @return Point2D in tree nearest to p
+     */
     public Point2D nearest(Point2D p) {
         if (p == null)
             throw new NullPointerException("Arguments cannot be null");
-        Node champion = nearestNode(p, root, root);
-        
-        return champion.p;
+        return nearestNode(p, root, root).p;
     }
     
     private Node nearestNode(Point2D p, Node champion, Node current) {
-    	
     	if(current.p.distanceTo(p) < champion.p.distanceTo(p)) {
     		champion = current;
     	}
@@ -185,12 +229,20 @@ public final class KdTreeST<Value> {
 		if (current.lb != null && compareByAxis(current, p) < 0 && current.lb.rect.intersects(nearestQueryRect(p, champion))) {
 				return nearestNode(p, champion, current.lb);
 		}
-		else if (current.rt != null && compareByAxis(current, p) > 0 && current.rt.rect.intersects(nearestQueryRect(p, champion))) {
+		else if (current.rt != null && compareByAxis(current, p) >= 0 && current.rt.rect.intersects(nearestQueryRect(p, champion))) {
 				return nearestNode(p, champion, current.rt);
 		}
+		
     	return champion;
     }
     
+    /**
+     * calculates rectangle for query point p
+     * based off euclidean distance between p and current champion
+     * @param p
+     * @param champion
+     * @return p rectangle
+     */
     private RectHV nearestQueryRect(Point2D p, Node champion) {
     	return new RectHV(
     			p.x() - p.distanceTo(champion.p),
@@ -206,8 +258,7 @@ public final class KdTreeST<Value> {
                 Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY
         );
     }
-
-    //FIXME calculate rectangles correctly
+    
     private final class Node {
         final Point2D p;      // the point
         final boolean vertical; //is the node split vertically? if false, the node is split horizontally
