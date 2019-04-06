@@ -224,14 +224,12 @@ public final class KdTreeST<Value> {
     private Node nearestNode(Point2D p, Node champion, Node current) {
     	if(current.p.distanceSquaredTo(p) < champion.p.distanceSquaredTo(p)) {
     		champion = current;
-    	}
-    	   
+    	}  
 		if (current.lb != null && compareByAxis(current, p) < 0 && current.lb.rect.intersects(nearestQueryRect(p, champion))) {
-				return nearestNode(p, champion, current.lb);
+			return nearestNode(p, champion, current.lb);
 		}
-		
-		if (current.rt != null && current.rt.rect.intersects(nearestQueryRect(p, champion))) {
-				return nearestNode(p, champion, current.rt);
+		if (current.rt != null && compareByAxis(current, p) >= 0 && current.rt.rect.intersects(nearestQueryRect(p, champion))) {
+			return nearestNode(p, champion, current.rt);
 		}
     	return champion;
     }
