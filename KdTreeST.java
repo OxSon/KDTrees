@@ -225,29 +225,13 @@ public final class KdTreeST<Value> {
     	if(current.p.distanceSquaredTo(p) < champion.p.distanceSquaredTo(p)) {
     		champion = current;
     	}  
-		if (current.lb != null && compareByAxis(current, p) < 0 && current.lb.rect.intersects(nearestQueryRect(p, champion))) {
+		if (current.lb != null && compareByAxis(current, p) < 0 && current.lb.rect.contains(p)) {
 			return nearestNode(p, champion, current.lb);
 		}
-		if (current.rt != null && compareByAxis(current, p) >= 0 && current.rt.rect.intersects(nearestQueryRect(p, champion))) {
+		if (current.rt != null && compareByAxis(current, p) >= 0 && current.rt.rect.contains(p)) {
 			return nearestNode(p, champion, current.rt);
 		}
     	return champion;
-    }
-    
-    /**
-     * calculates rectangle for query point p
-     * based off euclidean distance between p and current champion
-     * @param p
-     * @param champion
-     * @return p rectangle
-     */
-    private RectHV nearestQueryRect(Point2D p, Node champion) {
-    	return new RectHV(
-    			p.x() - p.distanceSquaredTo(champion.p),
-    			p.y() - p.distanceSquaredTo(champion.p),
-    			p.x() + p.distanceSquaredTo(champion.p),
-    			p.y() + p.distanceSquaredTo(champion.p)
-    			);
     }
     
     private RectHV rootRectangle() {
