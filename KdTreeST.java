@@ -1,7 +1,7 @@
 /**
  * Creates a symbol table that implements a KDtree with Point2D as key
- * 
- * 
+ *
+ *
  * @author Alec Mills & Kenneth Salguero
  */
 
@@ -10,6 +10,10 @@ package kdTree;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public final class KdTreeST<Value> {
     private Node root;
@@ -65,10 +69,10 @@ public final class KdTreeST<Value> {
             current.lb = put(current, current.lb, p, val);
         else
             current.rt = put(current, current.rt, p, val);
-        
+
         return current;
     }
-    
+
     /**
      * Compares a node & a point by which ever level node is at
      * used to determine which way to go in the tree
@@ -82,7 +86,7 @@ public final class KdTreeST<Value> {
         else
             return Point2D.Y_ORDER.compare(other, prev.p);
     }
-    
+
     /**
      * Calculates rectangle for a given point
      * @param parent
@@ -195,7 +199,7 @@ public final class KdTreeST<Value> {
                 check(q, child, rect);
         }
     }
-    
+
     private Queue<Node> getIntersections(Node node, RectHV rect) {
         Queue<Node> intersections = new Queue<>();
         if(node.lb != null) {
@@ -218,29 +222,68 @@ public final class KdTreeST<Value> {
     public Point2D nearest(Point2D p) {
         if (p == null)
             throw new NullPointerException("Arguments cannot be null");
-        return nearestNode(p, root, root).p;
+
+        Node champion = root;
+        if (root.p.equals(p))
+            return champion.p;
+
+        champion = nearestNode(p, champion, root);
+        return champion.p;
     }
-    
+
     private Node nearestNode(Point2D p, Node champion, Node current) {
-    	if(current.p.distanceSquaredTo(p) < champion.p.distanceSquaredTo(p)) {
+    	if(current.p.distanceSquaredTo(p) < champion.p.distanceSquaredTo(p))
     		champion = current;
-    	}  
-		if (current.lb != null && compareByAxis(current, p) < 0 && current.lb.rect.contains(p)) {
-			return nearestNode(p, champion, current.lb);
-		}
-		if (current.rt != null && compareByAxis(current, p) >= 0 && current.rt.rect.contains(p)) {
-			return nearestNode(p, champion, current.rt);
-		}
+
+    	for(Node viableChild : choosePath(current, champion, p))
+    	    current = nearestNode(p, champion, viableChild);
+
     	return champion;
     }
-    
+
+    private List<Node> choosePath(Node current, Node champion, Point2D queryPoint) {
+        List<Node> nodesToVisit = new ArrayList<>();
+
+        //What nodes to visit?
+//        if (current.lb != null)
+        if (current.lb != null && pathIsViable(current.lb, champion, queryPoint))
+            nodesToVisit.add(current.lb);
+
+//        if (current.rt != null) {
+        if (current.rt != null && pathIsViable(current.rt, champion, queryPoint)) {
+            nodesToVisit.add(current.rt);
+
+            //What order?
+            if (current.rt.rect.contains(queryPoint))
+                Collections.reverse(nodesToVisit);
+        }
+
+        return nodesToVisit;
+    }
+
+    private boolean pathIsViable(Node path, Node champion, Point2D queryPoint) {
+        double distance = path.rect.distanceSquaredTo(queryPoint);
+
+        if (distance == 0)
+            return true;
+        else return distance < champion.p.distanceSquaredTo(queryPoint);
+
+    }
+
+//    private Point2D hypotheticalNearest(Node current, Point2D queryPoint) {
+//        if (current.vertical)
+//            return new Point2D(current.p.x(), queryPoint.y());
+//        else
+//            return new Point2D(queryPoint.x(), current.p.y());
+//    }
+
     private RectHV rootRectangle() {
         return new RectHV(
                 Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY
         );
     }
-    
+
     private final class Node {
         final Point2D p;      // the point
         final boolean vertical; //is the node split vertically? if false, the node is split horizontally
