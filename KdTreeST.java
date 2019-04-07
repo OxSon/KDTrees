@@ -224,33 +224,32 @@ public final class KdTreeST<Value> {
             throw new NullPointerException("Arguments cannot be null");
 
         Node champion = root;
-        if (root.p.equals(p))
-            return champion.p;
-
         champion = nearestNode(p, champion, root);
-        return champion.p;
+
+        return champion == null ? null : champion.p;
     }
 
     private Node nearestNode(Point2D p, Node champion, Node current) {
-    	if(current.p.distanceSquaredTo(p) < champion.p.distanceSquaredTo(p))
-    		champion = current;
+        if (pathIsViable(current, champion, p)) {
+            if (current.p.distanceSquaredTo(p) < champion.p.distanceSquaredTo(p))
+                champion = current;
 
-    	for(Node viableChild : choosePath(current, champion, p))
-    	    current = nearestNode(p, champion, viableChild);
+            //FIXME figure out ordering
+            champion = nearestNode(p, champion, current.lb);
+            champion = nearestNode(p, champion, current.rt);
+        }
 
-    	return champion;
+        return champion;
     }
 
     private List<Node> choosePath(Node current, Node champion, Point2D queryPoint) {
         List<Node> nodesToVisit = new ArrayList<>();
 
         //What nodes to visit?
-//        if (current.lb != null)
-        if (current.lb != null && pathIsViable(current.lb, champion, queryPoint))
+        if (pathIsViable(current.lb, champion, queryPoint))
             nodesToVisit.add(current.lb);
 
-//        if (current.rt != null) {
-        if (current.rt != null && pathIsViable(current.rt, champion, queryPoint)) {
+        if (pathIsViable(current.rt, champion, queryPoint)) {
             nodesToVisit.add(current.rt);
 
             //What order?
@@ -262,6 +261,9 @@ public final class KdTreeST<Value> {
     }
 
     private boolean pathIsViable(Node path, Node champion, Point2D queryPoint) {
+        if (path == null)
+            return false;
+
         double distance = path.rect.distanceSquaredTo(queryPoint);
 
         if (distance == 0)
