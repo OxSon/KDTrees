@@ -1,10 +1,3 @@
-/**
- * Creates a symbol table that implements a KDtree with Point2D as key
- *
- *
- * @author Alec Mills & Kenneth Salguero
- */
-
 package kdTree;
 
 import edu.princeton.cs.algs4.Point2D;
@@ -15,26 +8,35 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Creates a generic symbol table that implements a 2D KD-Tree with Point2D as key
+ *
+ * @param <Value> type parameter for values in symbol table
+ * @author Alec Mills
+ * @author Kenneth Salguero
+ */
 public final class KdTreeST<Value> {
     private Node root;
     private int size;
 
     /**
-     * construct an empty symbol table of points
+     * Construct an empty symbol table of point.
      */
     public KdTreeST() {
     }
 
     /**
-     * is the symbol table empty?
-     * @return true if tree is empty
+     * Is the symbol table empty?
+     *
+     * @return true if tree is empty, false otherwise
      */
     public boolean isEmpty() {
         return root == null;
     }
 
     /**
-     * number of points
+     * Number of key-value association-pairs in symbol table.
+     *
      * @return size of the tree
      */
     public int size() {
@@ -42,83 +44,24 @@ public final class KdTreeST<Value> {
     }
 
     /**
-     * associate Value val with point p
-     * @param p
-     * @param val
+     * Associate Value 'val' with point 'p'.
+     *
+     * @param p   the key to associate with 'val'
+     * @param val the value to associate with key 'p'
      */
     public void put(Point2D p, Value val) {
         if (p == null || val == null)
             throw new NullPointerException("Arguments cannot be null");
+
         root = put(null, root, p, val);
     }
 
-    private Node put(Node prev, Node current, Point2D p, Value val) {
-        if (current == null) { //base case
-            size++;
-            return new Node(p, val, prev);
-        }
-
-        //we are updating a value of an already present key
-        if (current.p.equals(p)) {
-            current.value = val;
-            return current;
-        }
-
-        //we are adding a new key and still need to traverse the tree
-        if (compareByAxis(current, p) < 0)
-            current.lb = put(current, current.lb, p, val);
-        else
-            current.rt = put(current, current.rt, p, val);
-
-        return current;
-    }
 
     /**
-     * Compares a node & a point by which ever level node is at
-     * used to determine which way to go in the tree
-     * @param prev
-     * @param other
-     * @return int
-     */
-    private int compareByAxis(Node prev, Point2D other) {
-        if (prev.vertical)
-            return Point2D.X_ORDER.compare(other, prev.p);
-        else
-            return Point2D.Y_ORDER.compare(other, prev.p);
-    }
-
-    /**
-     * Calculates rectangle for a given point
-     * @param parent
-     * @param p
-     * @return RectHV of p
-     */
-    private RectHV calculateRect(Node parent, Point2D p) {
-        if (parent == null)
-            return rootRectangle();
-
-        int compareResult = parent.vertical ?
-                Point2D.X_ORDER.compare(p, parent.p) : Point2D.Y_ORDER.compare(p, parent.p);
-        RectHV parentRect = parent.rect;
-
-        if (parent.vertical) {
-            if (compareResult < 0)
-                return new RectHV(parentRect.xmin(), parentRect.ymin(), parent.p.x(), parentRect.ymax());
-            else
-                return new RectHV(parent.p.x(), parentRect.ymin(), parentRect.xmax(), parentRect.ymax());
-        } else {
-            if (compareResult < 0)
-                return new RectHV(parentRect.xmin(), parentRect.ymin(), parentRect.xmax(), parent.p.y());
-            else
-                return new RectHV(parentRect.xmin(), parent.p.y(), parentRect.xmax(), parentRect.ymax());
-        }
-    }
-
-
-    /**
-     * get Value associated with point p
-     * @param p
-     * @return value of p
+     * Get Value associated with point 'p'.
+     *
+     * @param p the key to get the value associated with
+     * @return value associated with key 'p'
      */
     public Value get(Point2D p) {
         if (p == null)
@@ -128,19 +71,12 @@ public final class KdTreeST<Value> {
         return result == null ? null : result.value;
     }
 
-    private Node get(Node current, Point2D p) {
-        if (current == null || current.p.equals(p))
-            return current;
-        else if (compareByAxis(current, p) < 0) {
-            return get(current.lb, p);
-        } else
-            return get(current.rt, p);
-    }
 
     /**
-     * Does the symbol table contain point p?
-     * @param p
-     * @return true if point is in tree
+     * Does the symbol table contain point 'p'?
+     *
+     * @param p the key to check for
+     * @return true if point is in tree, false otherwise
      */
     public boolean contains(Point2D p) {
         if (p == null)
@@ -150,8 +86,9 @@ public final class KdTreeST<Value> {
     }
 
     /**
-     * Iterable of all points in the symbol table in level order
-     * @return iterator of all points in tree
+     * Iterable of all points in the symbol table in level order.
+     *
+     * @return iterable of all points in tree
      */
     public Iterable<Point2D> points() {
         Node temp = root; //node we are currently processing
@@ -176,48 +113,26 @@ public final class KdTreeST<Value> {
     }
 
     /**
-     * all points that are inside the rectangle
-     * @param rectHV
-     * @return points inside range of rectHV
+     * All points that are inside the query rectangle.
+     *
+     * @param queryRect query rectangle
+     * @return points inside range of query rectangle
      */
-    public Iterable<Point2D> range(RectHV rectHV) {
-        if (rectHV == null)
+    public Iterable<Point2D> range(RectHV queryRect) {
+        if (queryRect == null)
             throw new NullPointerException("Arguments cannot be null");
 
         Queue<Point2D> nodesInRange = new Queue<>();
-        check(nodesInRange, root, rectHV);
+        check(nodesInRange, root, queryRect);
 
         return nodesInRange;
     }
 
-    private void check(Queue<Point2D> q, Node node, RectHV rect) {
-        if(node != null) {
-            if(rect.contains(node.p))
-                q.enqueue(node.p);
-
-            for(Node child : getIntersections(node, rect))
-                check(q, child, rect);
-        }
-    }
-
-    private Queue<Node> getIntersections(Node node, RectHV rect) {
-        Queue<Node> intersections = new Queue<>();
-        if(node.lb != null) {
-            if (rect.intersects(node.rect))
-                intersections.enqueue(node.lb);
-        }
-        if (node.rt != null) {
-            if (rect.intersects(node.rect))
-                intersections.enqueue(node.rt);
-        }
-
-        return intersections;
-    }
-
     /**
-     * a nearest neighbor to point p; null if the symbol table is empty
-     * @param p
-     * @return Point2D in tree nearest to p
+     * A nearest neighbor to point p; null if the symbol table is empty.
+     *
+     * @param p the key to query for
+     * @return a Point2D in tree nearest to p, arbitrary among possible candidates if more than one point are 'nearest'
      */
     public Point2D nearest(Point2D p) {
         if (p == null)
@@ -229,33 +144,61 @@ public final class KdTreeST<Value> {
         return champion == null ? null : champion.p;
     }
 
+
+    private Node get(Node current, Point2D p) {
+        if (current == null || current.p.equals(p))
+            return current;
+
+        else if (compareByAxis(p, current) < 0) {
+            return get(current.lb, p);
+        } else
+            return get(current.rt, p);
+    }
+
+    private void check(Queue<Point2D> q, Node node, RectHV queryRect) {
+        if (node != null) {
+            if (queryRect.contains(node.p))
+                q.enqueue(node.p);
+
+            for (Node child : getIntersections(node, queryRect))
+                check(q, child, queryRect);
+        }
+    }
+
+    private Queue<Node> getIntersections(Node node, RectHV rect) {
+        Queue<Node> intersections = new Queue<>();
+
+        if (node.lb != null) {
+            if (rect.intersects(node.rect))
+                intersections.enqueue(node.lb);
+        }
+        if (node.rt != null) {
+            if (rect.intersects(node.rect))
+                intersections.enqueue(node.rt);
+        }
+
+        return intersections;
+    }
+
     private Node nearestNode(Point2D p, Node champion, Node current) {
         if (pathIsViable(current, champion, p)) {
             if (current.p.distanceSquaredTo(p) < champion.p.distanceSquaredTo(p))
                 champion = current;
 
-            //FIXME figure out ordering
-            champion = nearestNode(p, champion, current.lb);
-            champion = nearestNode(p, champion, current.rt);
+            for (Node path : choosePath(current, p))
+                champion = nearestNode(p, champion, path);
         }
 
         return champion;
     }
 
-    private List<Node> choosePath(Node current, Node champion, Point2D queryPoint) {
+    private List<Node> choosePath(Node current, Point2D queryPoint) {
         List<Node> nodesToVisit = new ArrayList<>();
+        nodesToVisit.add(current.lb);
+        nodesToVisit.add(current.rt);
 
-        //What nodes to visit?
-        if (pathIsViable(current.lb, champion, queryPoint))
-            nodesToVisit.add(current.lb);
-
-        if (pathIsViable(current.rt, champion, queryPoint)) {
-            nodesToVisit.add(current.rt);
-
-            //What order?
-            if (current.rt.rect.contains(queryPoint))
-                Collections.reverse(nodesToVisit);
-        }
+        if (current.rt != null && current.rt.rect.contains(queryPoint))
+            Collections.reverse(nodesToVisit);
 
         return nodesToVisit;
     }
@@ -272,18 +215,82 @@ public final class KdTreeST<Value> {
 
     }
 
-//    private Point2D hypotheticalNearest(Node current, Point2D queryPoint) {
-//        if (current.vertical)
-//            return new Point2D(current.p.x(), queryPoint.y());
-//        else
-//            return new Point2D(queryPoint.x(), current.p.y());
-//    }
-
     private RectHV rootRectangle() {
         return new RectHV(
                 Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY
         );
+    }
+
+    private Node put(Node prev, Node current, Point2D p, Value val) {
+        if (current == null) { //base case
+            size++;
+            return new Node(p, val, prev);
+        }
+
+        //we are updating a value of an already present key
+        if (current.p.equals(p)) {
+            current.value = val;
+            return current;
+        }
+
+        //we are adding a new key and still need to traverse the tree
+        if (compareByAxis(p, current) < 0)
+            current.lb = put(current, current.lb, p, val);
+        else
+            current.rt = put(current, current.rt, p, val);
+
+        return current;
+    }
+
+    /**
+     * Compares a node to a point relative to appropriate axis (x | y).
+     * Used to determine which way to go in the tree.
+     *
+     * @param node  node we are processing
+     * @param other point to compare current node to
+     * @return negative, zero, or positive number as other point is lesser, equal, or greater relative to appropriate axis.
+     */
+    private int compareByAxis(Point2D other, Node node) {
+        if (node.vertical)
+            return Point2D.X_ORDER.compare(node.p, other);
+        else
+            return Point2D.Y_ORDER.compare(node.p, other);
+    }
+
+    /**
+     * Calculates rectangle for a given node based on its parent and its associated point.
+     *
+     * @param parent parent node of node for which we are calculating the rectangle
+     * @param p      point associated with node for which we are calculating the rectangle
+     * @return rectangle for a new node based on its parent and its associated point
+     */
+    private RectHV calculateRect(Node parent, Point2D p) {
+        if (parent == null)
+            return rootRectangle();
+
+        RectHV parentRect = parent.rect;
+        int compareResult = parent.vertical ?
+                Point2D.X_ORDER.compare(p, parent.p) : Point2D.Y_ORDER.compare(p, parent.p);
+
+        /*Rectangle dimensions are evaluated as follows:
+         * -If parent is vertical, only x values may change.
+         * -If parent is horizontal, only y values may change.
+         *
+         * -If new node is left child of parent, only max values will change.
+         * -If new node is right child of parent, only min values will change.
+         */
+        if (parent.vertical) {
+            if (compareResult < 0)
+                return new RectHV(parentRect.xmin(), parentRect.ymin(), parent.p.x(), parentRect.ymax());
+            else
+                return new RectHV(parent.p.x(), parentRect.ymin(), parentRect.xmax(), parentRect.ymax());
+        } else {
+            if (compareResult < 0)
+                return new RectHV(parentRect.xmin(), parentRect.ymin(), parentRect.xmax(), parent.p.y());
+            else
+                return new RectHV(parentRect.xmin(), parent.p.y(), parentRect.xmax(), parentRect.ymax());
+        }
     }
 
     private final class Node {
